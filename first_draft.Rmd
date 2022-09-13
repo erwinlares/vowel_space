@@ -1,0 +1,43 @@
+---
+title: "First draft - Simulated data"
+author: "Erwin Lares"
+date: " Created 2022-09-13. <br> Last modified `r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+## R Markdown
+
+
+```{r cars}
+
+library(tidyverse)
+
+set.seed(10)
+
+vowels = tibble(vowel = rep(c("a", "e", "i", "o", "u"), each = 50),
+                
+                F1 = c(rnorm(50, mean = 800, sd = 100), 
+                       rnorm(50, mean = 600, sd = 100), 
+                       rnorm(50, mean = 350, sd = 100), 
+                       rnorm(50, mean = 600, sd = 100), 
+                       rnorm(50, mean = 350, sd = 100)),
+                
+                F2 = c(rnorm(50, mean = 1500, sd = 150), 
+                       rnorm(50, mean = 2000, sd = 150), 
+                       rnorm(50, mean = 2500, sd = 150), 
+                       rnorm(50, mean = 1000, sd = 150), 
+                       rnorm(50, mean = 800, sd = 150)))
+
+
+ggplot(data = vowels, aes(x = F2, y = F1, color = vowel, label = vowel)) + 
+  geom_text() +
+  theme_minimal()
+
+```
+
