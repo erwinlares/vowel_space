@@ -5,18 +5,21 @@ date: " Created 2022-09-13. <br> Last modified `r Sys.Date()`"
 output: html_document
 ---
 
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(scales)
 ```
 
-## R Markdown
+## Data 
 
+Here the data consists of 50 simulated values. 
 
 ```{r cars}
 
-library(tidyverse)
 
 set.seed(10)
 
@@ -35,9 +38,157 @@ vowels = tibble(vowel = rep(c("a", "e", "i", "o", "u"), each = 50),
                        rnorm(50, mean = 800, sd = 150)))
 
 
+
+
+```
+
+## First plot 
+
+```{r}
 ggplot(data = vowels, aes(x = F2, y = F1, color = vowel, label = vowel)) + 
   geom_text() +
   theme_minimal()
+```
+
+
+This plot does not have its axes reversed which is contrary to convention. Typically, both F1 and F2 at the top right corner of the plot space. This can be easily accomplished by adding `scale_x_reverse()` and `scales_y_reverse()` to the ggplot list of function calls.
+
+## Second plot 
+
+```{r}
+ggplot(data = vowels, aes(x = F2, y = F1, color = vowel, label = vowel)) + 
+  geom_text() +
+  scale_x_reverse() +
+  scale_y_reverse() +
+  theme_minimal()
+```
+## Some aesthetic changes 
+
+To move the position of the axes in the plot itself, `scale_x/y_reverse()` can take the additional argument
+`position` which can be set to right and top respectively. 
+
+```{r}
+ggplot(data = vowels, aes(x = F2, y = F1, color = vowel, label = vowel)) + 
+  geom_text() + 
+  scale_y_reverse(position = "right") + 
+  scale_x_reverse(position = "top") +
+  theme_minimal() +
+  theme(legend.position = "none")
 
 ```
+
+## Add contour plots
+
+Using contour plots we can highlight the density of the vowels.
+
+```{r}
+ggplot(data = vowels, aes(x = F2, y = F1, color = vowel, label = vowel)) + 
+  geom_text() + 
+  scale_y_reverse(position = "right") + 
+  scale_x_reverse(position = "top") +
+  geom_density_2d() +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+### More aesthetics refinements 
+
+The code adjust the font size. The density layer is set to `alpha = 0.25` to increase legibility. The code also include explicit break and limits for the axes. 
+
+```{r}
+ggplot(data = vowels, aes(x = F2, y = F1, color = vowel, label = vowel)) + 
+  geom_text(size = 6) + # Font size for vowels
+  scale_y_reverse(position = "right", 
+                  labels = label_number(suffix = "Hz"),
+                  breaks = seq(100, 1000, 250)) + 
+  scale_x_reverse(position = "top", 
+                  labels = label_number(suffix = "Hz"),
+                  breaks = seq(200, 3000, 500)) + 
+  labs(x = "F2\n",
+       y = "F1\n",
+       title = "Final plot (A)") + 
+  geom_density_2d(alpha = 0.25) +
+  coord_cartesian(xlim = c(3000, 200), 
+                  ylim = c(1000, 100)) +
+  theme_classic() +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5), # Center plot title
+        text = element_text(size = 13))
+```
+
+
+Rather than contoured plots, the cluster of vowels can be enclosed by an elipse. 
+
+
+```{r}
+ggplot(data = vowels, aes(x = F2, y = F1, color = vowel, label = vowel)) + 
+  geom_text(size = 6) + # Font size for vowels
+  scale_y_reverse(position = "right", 
+                  labels = label_number(unit = "Hz"),
+                  breaks = seq(100, 1000, 250)) + 
+  scale_x_reverse(position = "top", 
+                  labels = label_number(unit = "Hz"),
+                  breaks = seq(200, 3000, 500)) + 
+  labs(x = "F2\n",
+       y = "F1\n",
+       title = "Final plot (B)") + 
+  stat_ellipse(type = "norm", alpha = 0.25) +
+  coord_cartesian(xlim = c(3000, 200), 
+                  ylim = c(1000, 100)) +
+  theme_classic() +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5))
+```
+
+# A less busy plot 
+
+This plot displays mean values of F1 and F2 
+
+```{r}
+
+means = vowels %>% 
+  group_by(vowel) %>% 
+  summarize(meanF1 = mean(F1),
+            meanF2 = mean(F2),
+            seF1 = sd(F1)/sqrt(n()),
+            seF2 = sd(F2)/sqrt(n()))
+
+ggplot(data = means, aes(x = meanF2, y = meanF1, color = vowel, label = vowel)) + 
+  geom_label(size = 12, fill = "white") + # Font size for vowels
+  scale_y_reverse(position = "right", 
+                  labels = label_number(unit = "Hz"),
+                  breaks = seq(100, 1000, 250)) + 
+  scale_x_reverse(position = "top", 
+                  labels = label_number(unit = "Hz"),
+                  breaks = seq(200, 3000, 500)) + 
+  labs(x = "F2\n",
+       y = "F1\n",
+       title = "Final plot (C)") + 
+  stat_ellipse(data = vowels, aes(x = F2, y = F1), type = "norm") +
+  coord_cartesian(xlim = c(3000, 200), 
+                  ylim = c(1000, 100)) +
+  theme_classic() +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5), 
+        text = element_text(size = 13))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
